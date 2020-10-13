@@ -23,17 +23,17 @@ class Server:
 
 class Request:
     def __init__(self, request):
-        self.timestamp = int(request[0])
+        self.request_time = int(request[0])
         self.process_time = int(request[2])
 
     def get_stamp(self):
-        return self.timestamp
+        return self.request_time
 
     def get_time(self):
         return self.process_time
 
-    def wait_time(self, prev_time):
-        return self.timestamp - int(prev_time)
+    def wait_time(self,current_time):
+        return current_time - self.process_time
 
 class Queue:
     def __init__(self):
@@ -80,9 +80,10 @@ def simulateManyServers(file, server_count):
         
         if not server.busy() and not reqs_queue.is_empty():
             next_request = reqs_queue.dequeue()
-            wait_times.append(next_request.wait_time(prev_time))
+            current_time = request.get_stamp()
+            wait_times.append(next_request.wait_time(current_time))
             server.start_next(next_request)
-            prev_time = next_request.timestamp
+            prev_time = next_request.request_time
         
         server.tick()
         server_queue.enqueue(server)
@@ -103,9 +104,10 @@ def simulateOneServer(file):
     while not reqs_queue.is_empty():
         if not server.busy() and not reqs_queue.is_empty():
             next_request = reqs_queue.dequeue()
-            wait_times.append(next_request.wait_time(prev_time))
+            current_time = request.get_stamp()
+            wait_times.append(next_request.wait_time(current_time))
             server.start_next(next_request)
-            prev_time = next_request.timestamp
+            prev_time = next_request.request_time
         server.tick()
 
     avg_wait_time = sum(wait_times) / len(wait_times)
